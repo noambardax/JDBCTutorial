@@ -2,7 +2,7 @@ package com.beans;
 
 import java.util.ArrayList;
 
-public class Customer {
+public class Customer2 {
 	private int id;
 	private String firsName;
 	private String lastName;
@@ -10,7 +10,7 @@ public class Customer {
 	private String email;
 	private ArrayList coupons;
 
-	public Customer(int id, String firsName, String lastName, String password, String email, ArrayList coupons) {
+	public Customer2(int id, String firsName, String lastName, String password, String email, ArrayList coupons) {
 		super();
 		this.id = id;
 		this.firsName = firsName;
@@ -19,19 +19,8 @@ public class Customer {
 		this.email = email;
 		this.coupons = coupons;
 	}
-	
 
-	public Customer(int id, String firsName, String lastName, String password, String email) {
-		super();
-		this.id = id;
-		this.firsName = firsName;
-		this.lastName = lastName;
-		this.password = password;
-		this.email = email;
-	}
-
-
-	public Customer() {
+	public Customer2() {
 		super();
 	}
 

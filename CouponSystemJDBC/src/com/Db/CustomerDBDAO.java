@@ -13,78 +13,64 @@ import com.beans.Company;
 import com.beans.Coupon;
 import com.beans.Customer;
 
-
-public class CustomerDBDAO implements CustomerDao{
-	private static final String QUERY_INSERT = "INSERT INTO `couponsystem`.`customers` (`id`, `firstName`, `lastName`, email`, `password`,) VALUES (?, ?, ?, ?,?,);";
-	private static final String QUERY_UPDATE = "UPDATE `couponsystem`.`customers` SET `firstName` = ?, `lastName` = ?, `email` = ? ,`password` = ? `coupons` = ? WHERE (`id` = ?);\r\n";
+public class CustomerDBDAO implements CustomerDao {
+	private static final ConnectionPull connP = ConnectionPull.getInstance();
+	private static final String QUERY_INSERT = "INSERT INTO `couponsystem`.`customers` VALUES (?, ?, ?, ?,?);";
+	private static final String QUERY_UPDATE = "UPDATE `couponsystem`.`customers` SET `first_nam` = ?, `last_name` = ?, `email` = ? ,`password` = ? WHERE id = ?;";   
 	private static final String QUERY_DELETE = "DELETE FROM `couponsystem`.`customers` WHERE (`id` = ?);";
 	private static final String QUERY_GET_ONE = "SELECT * FROM `couponsystem`.`customers` WHERE (`id` = ?);";
 	private static final String QUERY_GET_ALL = "SELECT * FROM `couponsystem`.`customers`";
+
+	// (`id`, `firstName`, `lastName`, email`, `password`)
 	@Override
 	public void addCustomer(Customer customer) {
 		Connection conn = null;
 		try {
-			// STEP 2 - Open Connection
-			conn = DriverManager.getConnection(DatabaseManager.getUrl(), DatabaseManager.getUser(),
-					DatabaseManager.getPass());
-			// STEP 3 - Run Script
+			// STEP 2 - Open
+			conn = connP.getConnection();
 			PreparedStatement statement = conn.prepareStatement(QUERY_INSERT);
+			// STEP 3 - Run Script
+
 			statement.setInt(1, customer.getId());
 			statement.setString(2, customer.getFirsName());
 			statement.setString(3, customer.getLastName());
 			statement.setString(4, customer.getEmail());
 			statement.setString(5, customer.getPassword());
-			//statement.setArray(6, (Array) customer.getCoupons());
+
 			statement.executeUpdate();
 			// STEP 4 - Optional only for results
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		} finally {
 			// STEP 5 - Close
-
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			connP.returnConnection(conn);
 		}
-
-		
 	}
 
 	public void updateCustomer(Customer customer) {
 
 		Connection conn = null;
 		try {
-			// STEP 2 - Open Connection
-			conn = DriverManager.getConnection(DatabaseManager.getUrl(), DatabaseManager.getUser(),
-					DatabaseManager.getPass());
+			// STEP 2 - Open
+			conn = connP.getConnection();
+
 			// STEP 3 - Run Script
 			PreparedStatement statement = conn.prepareStatement(QUERY_UPDATE);
-			statement.setInt(1, customer.getId());
-			statement.setString(2, customer.getFirsName());
-			statement.setString(3, customer.getLastName());
-			statement.setString(4, customer.getEmail());
-			statement.setString(5, customer.getPassword());
-			statement.setArray(6, (Array) customer.getCoupons());
+			statement.setInt(5, customer.getId());
+			statement.setString(1, customer.getFirsName());
+			statement.setString(2, customer.getLastName());
+			statement.setString(3, customer.getEmail());
+			statement.setString(4, customer.getPassword());
+
 			statement.executeUpdate();
 			// STEP 4 - Optional only for reuslts
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		} finally {
-			// STEP 5 - Close
+			connP.returnConnection(conn);
 
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 
-		
-		
 	}
 
 	@Override
@@ -111,41 +97,41 @@ public class CustomerDBDAO implements CustomerDao{
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 	@Override
 	public Customer getOneCustomer(int customerID) {
-		 Customer result = null;
-			
-			
-			Connection conn = null;
-			try {
-				// STEP 2 - Open Connection
-				conn = DriverManager.getConnection(DatabaseManager.getUrl(), DatabaseManager.getUser(),
-						DatabaseManager.getPass());
-				// STEP 3 - Run Script
-				PreparedStatement statement = conn.prepareStatement(QUERY_GET_ONE);
-				statement.setInt(1, customerID);
-				
-				// STEP 4 - Optional only for reuslts
-				ResultSet resultSet = statement.executeQuery();
-				resultSet.next();
-				result = new Customer(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3), resultSet.getString(4), resultSet.getString(5), (ArrayList) resultSet.getArray(6));
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
-			} finally {
-				// STEP 5 - Close
+		Customer result = null;
 
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		Connection conn = null;
+		try {
+			// STEP 2 - Open Connection
+			conn = DriverManager.getConnection(DatabaseManager.getUrl(), DatabaseManager.getUser(),
+					DatabaseManager.getPass());
+			// STEP 3 - Run Script
+			PreparedStatement statement = conn.prepareStatement(QUERY_GET_ONE);
+			statement.setInt(1, customerID);
+
+			// STEP 4 - Optional only for reuslts
+			ResultSet resultSet = statement.executeQuery();
+			resultSet.next();
+			result = new Customer(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3),
+					resultSet.getString(4), resultSet.getString(5), (ArrayList) resultSet.getArray(6));
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} finally {
+			// STEP 5 - Close
+
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-			return result;
+		}
+
+		return result;
 	}
 
 	@Override
@@ -164,7 +150,7 @@ public class CustomerDBDAO implements CustomerDao{
 			ResultSet resultSet = statement.executeQuery();
 			while (resultSet.next()) {
 				Customer customer = new Customer(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3),
-						 resultSet.getString(4), resultSet.getString(5),(ArrayList) resultSet.getArray(6));
+						resultSet.getString(4), resultSet.getString(5), (ArrayList) resultSet.getArray(6));
 				customers.add(customer);
 			}
 		} catch (Exception e) {
@@ -181,7 +167,7 @@ public class CustomerDBDAO implements CustomerDao{
 		}
 
 		return customers;
-		
+
 	}
 
 	@Override
@@ -200,7 +186,7 @@ public class CustomerDBDAO implements CustomerDao{
 			ResultSet resultSet = statement.executeQuery();
 			while (resultSet.next()) {
 				Customer c1 = new Customer(resultSet.getInt(1), resultSet.getString(2), resultSet.getString(3),
-						 resultSet.getString(4), resultSet.getString(5),(ArrayList) resultSet.getArray(6));
+						resultSet.getString(4), resultSet.getString(5), (ArrayList) resultSet.getArray(6));
 				customers.add(c1);
 			}
 		} catch (Exception e) {
@@ -216,18 +202,11 @@ public class CustomerDBDAO implements CustomerDao{
 			}
 		}
 
-       if (customers.contains(customer)) {
-		return true;
-	}		 
-		
-			
-		
+		if (customers.contains(customer)) {
+			return true;
+		}
+
 		return false;
 	}
 
-	
-
-	
-	
-	
 }

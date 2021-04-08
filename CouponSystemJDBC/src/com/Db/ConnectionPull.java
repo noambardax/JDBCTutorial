@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Stack;
 
 public class ConnectionPull {
@@ -72,14 +73,29 @@ public class ConnectionPull {
 		}
 	}
 
-	public PreparedStatement prepareStatement(String queryCreateSchema) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
+	public void executeQuery(String query) throws InterruptedException, SQLException {
+		Connection conn = this.getConnection();
+		PreparedStatement stmt = conn.prepareStatement(query);  
+		stmt.executeUpdate();
+		
+		this.returnConnection(conn);
+	}
+	
+	public PreparedStatement getPreparedStatement() {
+		Connection conn = this.getConnection();
+		PreparedStatement stmt = conn.prepareStatement(query);  
+		return null;
+		
+	}
+	public void executeQuaryWithParameters(String query, int id, List<String> A) {
+		Connection conn = this.getConnection();
+		PreparedStatement stmt = conn.prepareStatement(queryq);
+		
+	}
+	
 	public void close() {
 		instance.close();
-		// TODO Auto-generated method stub
-		
+
 	}
 }
